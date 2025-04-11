@@ -8,13 +8,15 @@ const sizeRoutes = require("./routes/size.route.js");
 const cartRoutes = require("./routes/cart.route.js");
 const orderRoutes = require("./routes/order.route.js");
 
-const authMiddleware = require("./middlewares/auth.middleware.js");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 
 const app = express();
 const PORT = process.env.PORT || 8000;
-
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://ibrahimrug.com"
+];
 // Set up EJS for server-side rendering
 // app.set("view engine", "ejs");
 
@@ -22,7 +24,16 @@ const PORT = process.env.PORT || 8000;
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static("public"));
-app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true
+}));
 app.use(express.json());
 
 // Routes
@@ -33,11 +44,6 @@ app.use("/api/sizes", sizeRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
 
-// app.get("/", authMiddleware, async (req, res) => {
-//   const urls = await URL.find({});
-//   console.log(req.user)
-//   return res.render("index", { title: "Home", urls, user: req.user });
-// });
 
 // DB Connection and run the app
 connectDB()
