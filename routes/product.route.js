@@ -11,7 +11,7 @@ router.get("/", getProducts);
 
 router.get("/:id",verifyAdmin, getProduct);
 
-router.patch("/:id", verifyAdmin, upload.single("image"), updateProduct);
+router.patch("/:id", verifyAdmin, upload.array("images", 5), updateProduct);
 
 router.delete("/:id", verifyAdmin, deleteProduct);
 

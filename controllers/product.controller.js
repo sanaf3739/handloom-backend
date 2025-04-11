@@ -81,13 +81,15 @@ const addProduct = async (req, res) => {
   console.log(req.file);
   try {
     const { name, originalPrice, price, rating, size, description, category } = req.body;
-    const images = req.files ? req.files.map(file => `${process.env.APP_URL}/uploads/${file.filename}`) : [];
+    const images = req.files
+      ? req.files.map((file) => `${process.env.APP_URL}/uploads/${file.filename}`)
+      : [];
 
-    if(!images.length){
+    if (!images.length) {
       return res.status(422).json({
         success: false,
-        message: "Please upload an image"
-      })
+        message: "Please upload an image",
+      });
     }
     // Auto-calculate discount
     const discount = Math.ceil(((originalPrice - price) / originalPrice) * 100);
@@ -114,13 +116,15 @@ const addProduct = async (req, res) => {
 };
 
 const updateProduct = async (req, res) => {
-  console.log(req.file);
+  console.log(req.files);
   try {
     const product = await Product.findById(req.params.id);
     if (!product) return res.status(404).json({ message: "Product not found" });
 
     const { name, originalPrice, price, rating, size, description, category } = req.body;
-    const image = req.file ? req.file.filename : product.image; // Only update if a new image is uploaded
+    const images = req.files
+      ? req.files.map((file) => `${process.env.APP_URL}/uploads/${file.filename}`)
+      : [];
 
     // Recalculate discount if originalPrice or price is changed
     const discount =
@@ -136,7 +140,9 @@ const updateProduct = async (req, res) => {
     product.size = size || product.size;
     product.description = description || product.description;
     product.category = category || product.category;
-    product.image = image;
+    if (images.length > 0) {
+      product.images = images;
+    }
 
     const updatedProduct = await product.save();
     res.json({ message: "Product updated successfully", product: updatedProduct });
