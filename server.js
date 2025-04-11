@@ -13,10 +13,7 @@ const cors = require("cors");
 
 const app = express();
 const PORT = process.env.PORT || 8000;
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://ibrahimrug.com"
-];
+
 // Set up EJS for server-side rendering
 // app.set("view engine", "ejs");
 
@@ -24,16 +21,16 @@ const allowedOrigins = [
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static("public"));
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://ibrahimrug.com",
+      "https://www.ibrahimrug.com",
+    ],
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // Routes
@@ -43,7 +40,6 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/sizes", sizeRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
-
 
 // DB Connection and run the app
 connectDB()
