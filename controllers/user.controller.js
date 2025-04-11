@@ -1,6 +1,7 @@
 const User = require("../models/user.model");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { default: cookieOptions } = require("../config/cookies/cookieOptions");
 
 // Function to generate access and refresh token
 const generateAccessAndRefreshTokens = async (user) => {
@@ -51,14 +52,11 @@ const handleLogin = async (req, res) => {
     const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user);
 
     const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
-    const options = {
-      httpOnly: true,
-      secure: true,
-    };
+
     return res
       .status(200)
-      .cookie("accessToken", accessToken, options)
-      .cookie("refreshToken", refreshToken, options)
+      .cookie("accessToken", accessToken, cookieOptions)
+      .cookie("refreshToken", refreshToken, cookieOptions)
       .json({ success: true, user: loggedInUser, message: "Loggedin successfully" });
   } catch (error) {
     res.status(500).json({ success: false, message: "Server error" });
