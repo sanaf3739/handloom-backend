@@ -1,5 +1,7 @@
 const Category = require("../models/category.model.js");
 const Product = require("../models/product.model.js");
+const { uploadOnCloudinary } = require("../utils/cloudinary.js");
+const cloudinary = require("cloudinary").v2;
 
 const getProduct = async (req, res) => {
   try {
@@ -116,20 +118,33 @@ const addProduct = async (req, res) => {
 };
 
 const updateProduct = async (req, res) => {
-  console.log(req.files);
   try {
     const product = await Product.findById(req.params.id);
     if (!product) return res.status(404).json({ message: "Product not found" });
 
     const { name, originalPrice, price, rating, size, description, category } = req.body;
-    const images = req.files
-      ? req.files.map((file) => `${process.env.APP_URL}/uploads/${file.filename}`)
-      : [];
+
+    let newImages = [];
+
+    if (req.files && req.files.length > 0) {
+      // Upload all new images to Cloudinary
+      const uploadedImages = await Promise.all(
+        req.files.map((file) => uploadOnCloudinary(file.path))
+      );
+
+      // Filter out failed uploads
+      newImages = uploadedImages
+        .filter((img) => img !== null)
+        .map((img) => ({
+          url: img.secure_url,
+          public_id: img.public_id,
+        }));
+    }
 
     // Recalculate discount if originalPrice or price is changed
     const discount =
       originalPrice && price
-        ? ((originalPrice - price) / originalPrice) * 100
+        ? Math.ceil(((originalPrice - price) / originalPrice) * 100)
         : product.discount;
 
     product.name = name || product.name;
@@ -140,8 +155,15 @@ const updateProduct = async (req, res) => {
     product.size = size || product.size;
     product.description = description || product.description;
     product.category = category || product.category;
-    if (images.length > 0) {
-      product.images = images;
+
+    // Delete previous images from Cloudinary
+    if (newImages.length > 0 && product.images.length > 0) {
+      for (const img of product.images) {
+        if (img.public_id) {
+          await cloudinary.uploader.destroy(img.public_id);
+        }
+      }
+      product.images = newImages;
     }
 
     const updatedProduct = await product.save();

@@ -41,10 +41,18 @@ const productSchema = new mongoose.Schema(
       ref: "Category",
       required: true,
     }, // Reference Category collection
-    images: {
-      type: [String],
-      required: true,
-    }, // Store image filename (backend handles Cloudinary),
+    images: [
+      {
+        url: {
+          type: String,
+          required: true,
+        },
+        public_id: {
+          type: String,
+          required: true,
+        },
+      },
+    ], // Store image filename (backend handles Cloudinary),
     stock: {
       type: Number,
       default: 1,
