@@ -1,7 +1,5 @@
+const cookieOptions = require("../config/cookies/cookieOptions");
 const User = require("../models/user.model");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const { default: cookieOptions } = require("../config/cookies/cookieOptions");
 
 // Function to generate access and refresh token
 const generateAccessAndRefreshTokens = async (user) => {
@@ -25,10 +23,8 @@ const handleLogin = async (req, res) => {
   // compare the password
   // password and refresh token
   // send cookie and res
-  console.log("Received Body:", req.body); // ✅ Debugging line
 
   const { email, password } = req.body;
-  console.log(email)
   try {
     if (!email) {
       return res.status(422).json({ error: "Email is required" });

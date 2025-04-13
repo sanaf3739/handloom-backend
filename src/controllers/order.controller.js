@@ -107,14 +107,11 @@ exports.createOrder = async (req, res) => {
 };
 
 exports.getOrders = async (req, res) => {
-  console.log("feching orders...");
-  // return res.json({success: true})
   try {
     const orders = await Order.find({ userId: req.user._id });
     // .sort({ createdAt: -1 })
     // .populate("items.product");
 
-    console.log(orders);
     res.status(200).json(orders);
   } catch (error) {
     res.status(500).json({

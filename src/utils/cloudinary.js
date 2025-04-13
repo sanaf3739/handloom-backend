@@ -23,7 +23,7 @@ const uploadOnCloudinary = async (localFilePath) => {
       console.error("Local file deletion failed:", err.message);
     }
     return response;
-    
+
   } catch (error) {
     console.error("Cloudinary upload failed:", error.message);
 

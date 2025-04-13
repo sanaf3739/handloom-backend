@@ -56,7 +56,6 @@ const getProducts = async (req, res) => {
     if (sort === "rating") sortOption = { rating: -1 };
 
     // Fetch products with filters, pagination, sorting
-    // console.log(filter);
     const products = await Product.find(filter)
       .populate("category")
       .populate("size", "name")
@@ -65,7 +64,6 @@ const getProducts = async (req, res) => {
       .sort(sortOption);
 
     // Get total count
-    // console.log(products);
     const totalCount = await Product.countDocuments(filter);
 
     res.json({
@@ -80,19 +78,33 @@ const getProducts = async (req, res) => {
 };
 
 const addProduct = async (req, res) => {
-  console.log(req.file);
   try {
     const { name, originalPrice, price, rating, size, description, category } = req.body;
-    const images = req.files
-      ? req.files.map((file) => `${process.env.APP_URL}/uploads/${file.filename}`)
-      : [];
 
-    if (!images.length) {
+    const localImages = req.files;
+
+    if (!localImages || !localImages.length) {
       return res.status(422).json({
         success: false,
         message: "Please upload an image",
       });
     }
+
+    const cloudinaryUploadResults = await Promise.all(
+      localImages.map((image) => uploadOnCloudinary(image.path))
+    );
+
+    const uploadedImages = cloudinaryUploadResults
+      .filter((result) => result !== null)
+      .map((img) => ({ url: img.secure_url, public_id: img.public_id }));
+
+    if (!uploadedImages.length) {
+      return res.status(500).json({
+        success: false,
+        message: "Image upload failed",
+      });
+    }
+
     // Auto-calculate discount
     const discount = Math.ceil(((originalPrice - price) / originalPrice) * 100);
 
@@ -105,7 +117,7 @@ const addProduct = async (req, res) => {
       size,
       description,
       category,
-      images,
+      images: uploadedImages,
     });
 
     const savedProduct = await newProduct.save();
