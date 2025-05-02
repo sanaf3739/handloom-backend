@@ -23,6 +23,7 @@ const sizeRoutes = require("./routes/size.route.js");
 const cartRoutes = require("./routes/cart.route.js");
 const orderRoutes = require("./routes/order.route.js");
 const dashboardRoutes = require("./routes/dashboard.route.js");
+const contactRoutes = require("./routes/contact.route.js");
 
 // Routes
 app.use("/api/auth", userRouter);
@@ -32,5 +33,6 @@ app.use("/api/sizes", sizeRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/contact", contactRoutes);
 
 module.exports = { app };

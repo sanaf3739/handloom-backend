@@ -13,14 +13,25 @@ const getProduct = async (req, res) => {
 
     res.json(product);
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch product", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to fetch product", error: error.message });
   }
 };
 
 const getProducts = async (req, res) => {
   try {
-    let { page, limit, search, category, minPrice, maxPrice, rating, size, sort } =
-      req.query;
+    let {
+      page,
+      limit,
+      search,
+      category,
+      minPrice,
+      maxPrice,
+      rating,
+      size,
+      sort,
+    } = req.query;
 
     // Default pagination values
     page = parseInt(page) || 1;
@@ -73,13 +84,16 @@ const getProducts = async (req, res) => {
       products,
     });
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch products", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to fetch products", error: error.message });
   }
 };
 
 const addProduct = async (req, res) => {
   try {
-    const { name, originalPrice, price, rating, size, description, category } = req.body;
+    const { name, originalPrice, price, rating, size, description, category } =
+      req.body;
 
     const localImages = req.files;
 
@@ -121,11 +135,17 @@ const addProduct = async (req, res) => {
     });
 
     const savedProduct = await newProduct.save();
-    res
-      .status(201)
-      .json({ message: "Product created successfully", product: savedProduct });
+    return res.status(201).json({
+      success: true,
+      message: "Product created successfully",
+      product: savedProduct,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Failed to create product", error: error.message });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to create product",
+      error: error.message,
+    });
   }
 };
 
@@ -134,7 +154,8 @@ const updateProduct = async (req, res) => {
     const product = await Product.findById(req.params.id);
     if (!product) return res.status(404).json({ message: "Product not found" });
 
-    const { name, originalPrice, price, rating, size, description, category } = req.body;
+    const { name, originalPrice, price, rating, size, description, category } =
+      req.body;
 
     let newImages = [];
 
@@ -179,9 +200,17 @@ const updateProduct = async (req, res) => {
     }
 
     const updatedProduct = await product.save();
-    res.json({ message: "Product updated successfully", product: updatedProduct });
+    return res.json({
+      success: true,
+      message: "Product updated successfully",
+      product: updatedProduct,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Failed to update product", error: error.message });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update product",
+      error: error.message,
+    });
   }
 };
 
@@ -189,11 +218,18 @@ const deleteProduct = async (req, res) => {
   try {
     const product = await Product.findByIdAndDelete(req.params.id);
 
-    if (!product) return res.status(404).json({ message: "Product not found" });
+    if (!product)
+      return res
+        .status(404)
+        .json({ success: false, message: "Product not found" });
 
-    res.json({ message: "Product deleted successfully" });
+    return res.json({ success: true, message: "Product deleted successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Failed to delete product", error: error.message });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to delete product",
+      error: error.message,
+    });
   }
 };
 
